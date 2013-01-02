@@ -13,7 +13,7 @@ namespace RMService
 	// NOTE: You can use the "Rename" command on the "Refactor" menu to change the class name "Service1" in code, svc and config file together.
 	public class Service : IService
 	{
-		public string GetData()
+		/*public string GetData()
 		{
 			//var uriString = ConfigurationManager.AppSettings["SQLSERVER_URI"];
 			var uriString = "sqlserver://jussgvdzfzltpama:Es5VLb46QEH3YWvZ37rtjKm6t6Kpc22xt3dYrdKt4UaSppgxGH2LRjY4f8BNxM3X@0367a0d1-0c21-4942-ac84-a13800a67b43.sqlserver.sequelizer.com/db0367a0d10c214942ac84a13800a67b43";
@@ -68,9 +68,9 @@ namespace RMService
 				composite.StringValue += "Suffix";
 			}
 			return composite;
-		}
+		}*/
 
-        string cString = "Data Source=(LocalDB)\\v11.0;AttachDbFilename=\"|DataDirectory|\\Database\\RestaurantMenuDB.mdf\";Integrated Security=True;Connect Timeout=30";
+        string cString = "Server=a1b4e5e1-6911-4f61-af49-a13a0102fc31.sqlserver.sequelizer.com;Database=dba1b4e5e169114f61af49a13a0102fc31;User ID=tzdygywlrfqyvwan;Password=smcHBa5kEmSmPBPxobowhVBAkWPwfQpz2nvoVSeUa5AcpQTnEoRXNLyDRJxNtGfX;";
 
         public string XMLData(string id)
         {

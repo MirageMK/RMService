@@ -12,7 +12,7 @@ namespace RMService
 	[ServiceContract]
 	public interface IService
 	{
-
+        /*
 		[OperationContract]
 		[WebInvoke(Method = "GET",
 				   RequestFormat = WebMessageFormat.Json,
@@ -22,7 +22,7 @@ namespace RMService
 
 		[OperationContract]
 		CompositeType GetDataUsingDataContract(CompositeType composite);
-
+        */
         [OperationContract]
         [WebInvoke(Method = "GET",
             ResponseFormat = WebMessageFormat.Xml,
@@ -54,7 +54,7 @@ namespace RMService
 
 
 	// Use a data contract as illustrated in the sample below to add composite types to service operations.
-	[DataContract]
+	/*[DataContract]
 	public class CompositeType
 	{
 		bool boolValue = true;
@@ -73,5 +73,5 @@ namespace RMService
 			get { return stringValue; }
 			set { stringValue = value; }
 		}
-	}
+	}*/
 }
