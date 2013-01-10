@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -13,7 +14,7 @@ namespace RMService
     // NOTE: In order to launch WCF Test Client for testing this service, please select Service1.svc or Service1.svc.cs at the Solution Explorer and start debugging.
     public class Service1 : IService1
     {
-        string cString = "Server=a1b4e5e1-6911-4f61-af49-a13a0102fc31.sqlserver.sequelizer.com;Database=dba1b4e5e169114f61af49a13a0102fc31;User ID=tzdygywlrfqyvwan;Password=smcHBa5kEmSmPBPxobowhVBAkWPwfQpz2nvoVSeUa5AcpQTnEoRXNLyDRJxNtGfX;";
+        string cString = ConfigurationManager.AppSettings["SQLSERVER_CONNECTION_STRING"];
 
         public List<Group> getAllGroups()
         {
