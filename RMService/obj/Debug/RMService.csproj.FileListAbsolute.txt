@@ -1,0 +1,5 @@
+C:\Users\Aleksandar\Documents\Visual Studio 2012\Projects\RMService\RMService\bin\RMService.dll
+C:\Users\Aleksandar\Documents\Visual Studio 2012\Projects\RMService\RMService\bin\RMService.pdb
+C:\Users\Aleksandar\Documents\Visual Studio 2012\Projects\RMService\RMService\obj\Debug\RMService.csprojResolveAssemblyReference.cache
+C:\Users\Aleksandar\Documents\Visual Studio 2012\Projects\RMService\RMService\obj\Debug\RMService.dll
+C:\Users\Aleksandar\Documents\Visual Studio 2012\Projects\RMService\RMService\obj\Debug\RMService.pdb

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.ServiceModel;
@@ -12,22 +13,131 @@ namespace RMService
     // NOTE: In order to launch WCF Test Client for testing this service, please select Service1.svc or Service1.svc.cs at the Solution Explorer and start debugging.
     public class Service1 : IService1
     {
-        public string GetData(int value)
+        string cString = "Server=a1b4e5e1-6911-4f61-af49-a13a0102fc31.sqlserver.sequelizer.com;Database=dba1b4e5e169114f61af49a13a0102fc31;User ID=tzdygywlrfqyvwan;Password=smcHBa5kEmSmPBPxobowhVBAkWPwfQpz2nvoVSeUa5AcpQTnEoRXNLyDRJxNtGfX;";
+
+        public List<Group> getAllGroups()
         {
-            return string.Format("You entered: {0}", value);
+            List<Group> toReturn = new List<Group>();
+
+            SqlConnection connection = new SqlConnection(cString);
+            string sqlString = "SELECT * FROM mGroup";
+            SqlCommand cmd = new SqlCommand(sqlString, connection);
+
+            try
+            {
+                connection.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    Group g = new Group();
+                    g.ID = Int32.Parse(reader[0].ToString());
+                    g.key = reader[1].ToString();
+                    g.title = reader[2].ToString();
+                    g.subtitle = reader[3].ToString();
+                    g.backgroundImage = reader[4].ToString();
+                    g.description = reader[5].ToString();
+
+                    toReturn.Add(g);
+                }
+                reader.Close();
+            }
+            catch (Exception e)
+            {
+                Group g = new Group();
+                g.ID = -1;
+                g.title = e.ToString();
+
+                toReturn.Add(g);
+                return toReturn;
+            }
+            finally
+            {
+                connection.Close();
+            }
+            return toReturn;
         }
 
-        public CompositeType GetDataUsingDataContract(CompositeType composite)
+        public List<Item> getAllItems()
         {
-            if (composite == null)
+            List<Item> toReturn = new List<Item>();
+
+            SqlConnection connection = new SqlConnection(cString);
+            string sqlString = "SELECT * FROM mItem";
+            SqlCommand cmd = new SqlCommand(sqlString, connection);
+
+            try
             {
-                throw new ArgumentNullException("composite");
+                connection.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    Item i = new Item();
+                    i.ID = Int32.Parse(reader[0].ToString());
+                    i.group = getGroup(reader[1].ToString());
+                    i.title = reader[2].ToString();
+                    i.subtitle = reader[3].ToString();
+                    i.description = reader[4].ToString();
+                    i.content = reader[5].ToString();
+                    i.backgroundImage = reader[6].ToString();
+
+                    toReturn.Add(i);
+                }
+                reader.Close();
             }
-            if (composite.BoolValue)
+            catch (Exception e)
             {
-                composite.StringValue += "Suffix";
+                Item i = new Item();
+                i.ID = -1;
+                i.title = e.ToString();
+
+                toReturn.Add(i);
+                return toReturn;
             }
-            return composite;
+            finally
+            {
+                connection.Close();
+            }
+            return toReturn;
+        }
+
+        public Group getGroup(String gKey)
+        {
+            Group g = new Group();
+
+            SqlConnection connection = new SqlConnection(cString);
+            string sqlString = "SELECT * FROM mGroup WHERE [key] = '" + gKey + "'";
+            SqlCommand cmd = new SqlCommand(sqlString, connection);
+
+            try
+            {
+                connection.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    g.ID = Int32.Parse(reader[0].ToString());
+                    g.key = reader[1].ToString();
+                    g.title = reader[2].ToString();
+                    g.subtitle = reader[3].ToString();
+                    g.backgroundImage = reader[4].ToString();
+                    g.description = reader[5].ToString();
+                }
+                reader.Close();
+            }
+            catch (Exception e)
+            {
+                g.ID = -1;
+                g.title = e.ToString();
+
+                return g;
+            }
+            finally
+            {
+                connection.Close();
+            }
+            return g;
         }
     }
 }
