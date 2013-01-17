@@ -16,14 +16,21 @@ namespace RMService
         [WebInvoke(Method = "GET",
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.Wrapped,
-            UriTemplate = "json/getAllGroups")]
+            UriTemplate = "getAllGroups")]
         List<Group> getAllGroups();
 
         [OperationContract]
         [WebInvoke(Method = "GET",
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.Wrapped,
-            UriTemplate = "json/getAllItems")]
-        List<Item> getAllItems();
+            UriTemplate = "getAllItems?time={time}")]
+        List<Item> getAllItems(string time);
+
+        [OperationContract]
+        [WebInvoke(Method = "POST", RequestFormat = WebMessageFormat.Json,
+            ResponseFormat = WebMessageFormat.Json,
+            BodyStyle = WebMessageBodyStyle.WrappedResponse,
+            UriTemplate = "insertItem")]
+        String insertItem(Item item);
     }
 }

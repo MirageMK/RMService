@@ -59,7 +59,7 @@ namespace RMService
             return toReturn;
         }
 
-        public List<Item> getAllItems()
+        public List<Item> getAllItems(string time)
         {
             List<Item> toReturn = new List<Item>();
 
@@ -101,6 +101,48 @@ namespace RMService
                 connection.Close();
             }
             return toReturn;
+        }
+
+        public String insertItem(Item item)
+        {
+            String result;
+
+            SqlConnection connection = new SqlConnection(cString);
+            string sqlString = "DECLARE @max int " +
+                                "SET @max = (SELECT max(id) FROM mItem) " +
+
+                                "INSERT INTO mItem " +
+                                "VALUES (@max+1, " +
+                                "@group, " +
+                                "@title, " +
+                                "@price, " +
+                                "@description, " +
+                                "@content, " +
+                                "@backgroundImage)";
+            SqlCommand cmd = new SqlCommand(sqlString, connection);
+
+            cmd.Parameters.AddWithValue("group", item.group.key);
+            cmd.Parameters.AddWithValue("title", item.title);
+            cmd.Parameters.AddWithValue("price", item.subtitle);
+            cmd.Parameters.AddWithValue("description", item.description);
+            cmd.Parameters.AddWithValue("content", item.content);
+            cmd.Parameters.AddWithValue("backgroundImage", item.backgroundImage);
+
+            try
+            {
+                connection.Open();
+                result = cmd.ExecuteNonQuery().ToString();
+            }
+            catch (Exception e)
+            {
+                return e.ToString();
+            }
+            finally
+            {
+                connection.Close();
+            }
+
+            return result;
         }
 
         public Group getGroup(String gKey)
