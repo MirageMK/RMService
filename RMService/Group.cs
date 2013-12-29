@@ -10,7 +10,7 @@ namespace RMService
     public class Group
     {
         [DataMember]
-        public int ID;
+        public int ID; 
         [DataMember]
         public string key;
         [DataMember]
