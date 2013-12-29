@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data.SqlClient;
@@ -50,6 +51,40 @@ namespace RMService
                 g.title = e.ToString();
 
                 toReturn.Add(g);
+                return toReturn;
+            }
+            finally
+            {
+                connection.Close();
+            }
+            return toReturn;
+        }
+
+        public Hashtable getAllSettings()
+        {
+            Hashtable toReturn = new Hashtable();
+
+            SqlConnection connection = new SqlConnection(cString);
+            string sqlString = "SELECT * FROM mGeneral";
+            SqlCommand cmd = new SqlCommand(sqlString, connection);
+
+            try
+            {
+                connection.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    String key = reader[1].ToString();
+                    String value = reader[2].ToString();
+
+                    toReturn.Add(key, value);
+                }
+                reader.Close();
+            }
+            catch (Exception e)
+            {
+                toReturn.Add("null", e.ToString());
                 return toReturn;
             }
             finally
@@ -181,6 +216,37 @@ namespace RMService
                 connection.Close();
             }
             return g;
+        }
+
+        public String setLogo(String logo)
+        {
+            String result;
+
+            SqlConnection connection = new SqlConnection(cString);
+
+            string sqlString = "UPDATE mGeneral " +
+                                "SET value = @logo " +
+                                "WHERE [key] = 'logo'";
+
+            SqlCommand cmd = new SqlCommand(sqlString, connection);
+
+            cmd.Parameters.AddWithValue("logo", logo);
+
+            try
+            {
+                connection.Open();
+                result = cmd.ExecuteNonQuery().ToString();
+            }
+            catch (Exception e)
+            {
+                return e.ToString();
+            }
+            finally
+            {
+                connection.Close();
+            }
+
+            return result;
         }
     }
 }

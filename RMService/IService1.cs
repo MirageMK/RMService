@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -23,6 +24,13 @@ namespace RMService
         [WebInvoke(Method = "GET",
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.Wrapped,
+            UriTemplate = "getAllSettings")]
+        Hashtable getAllSettings();
+
+        [OperationContract]
+        [WebInvoke(Method = "GET",
+            ResponseFormat = WebMessageFormat.Json,
+            BodyStyle = WebMessageBodyStyle.Wrapped,
             UriTemplate = "getAllItems?time={time}")]
         List<Item> getAllItems(string time);
 
@@ -32,5 +40,12 @@ namespace RMService
             BodyStyle = WebMessageBodyStyle.WrappedResponse,
             UriTemplate = "insertItem")]
         String insertItem(Item item);
+
+        [OperationContract]
+        [WebInvoke(Method = "POST", RequestFormat = WebMessageFormat.Json,
+            ResponseFormat = WebMessageFormat.Json,
+            BodyStyle = WebMessageBodyStyle.WrappedResponse,
+            UriTemplate = "setLogo")]
+        String setLogo(String logo);
     }
 }
