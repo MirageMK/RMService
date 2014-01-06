@@ -138,6 +138,51 @@ namespace RMService
             return toReturn;
         }
 
+        public List<Item> getAllItemsByGroup(string group)
+        {
+            List<Item> toReturn = new List<Item>();
+
+            SqlConnection connection = new SqlConnection(cString);
+            string sqlString = "SELECT * FROM mItem WHERE [group] = @group";
+            SqlCommand cmd = new SqlCommand(sqlString, connection);
+
+            cmd.Parameters.AddWithValue("group", group);
+            try
+            {
+                connection.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    Item i = new Item();
+                    i.ID = Int32.Parse(reader[0].ToString());
+                    i.group = getGroup(reader[1].ToString());
+                    i.title = reader[2].ToString();
+                    i.subtitle = reader[3].ToString();
+                    i.description = reader[4].ToString();
+                    i.content = reader[5].ToString();
+                    i.backgroundImage = reader[6].ToString();
+
+                    toReturn.Add(i);
+                }
+                reader.Close();
+            }
+            catch (Exception e)
+            {
+                Item i = new Item();
+                i.ID = -1;
+                i.title = e.ToString();
+
+                toReturn.Add(i);
+                return toReturn;
+            }
+            finally
+            {
+                connection.Close();
+            }
+            return toReturn;
+        }
+
         public String insertItem(Item item)
         {
             String result;

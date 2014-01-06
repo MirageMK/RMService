@@ -35,6 +35,13 @@ namespace RMService
         List<Item> getAllItems(string time);
 
         [OperationContract]
+        [WebInvoke(Method = "GET",
+            ResponseFormat = WebMessageFormat.Json,
+            BodyStyle = WebMessageBodyStyle.Wrapped,
+            UriTemplate = "getAllItemsByGroup?group={group}")]
+        List<Item> getAllItemsByGroup(string group);
+
+        [OperationContract]
         [WebInvoke(Method = "POST", RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedResponse,
