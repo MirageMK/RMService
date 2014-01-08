@@ -19,6 +19,11 @@ namespace RMService
 
         public List<Group> getAllGroups()
         {
+            WebOperationContext.Current.OutgoingResponse.Headers.Add(
+  "Access-Control-Allow-Origin", "*"); WebOperationContext.Current.OutgoingResponse.Headers.Add(
+  "Access-Control-Allow-Methods", "POST"); WebOperationContext.Current.OutgoingResponse.Headers.Add(
+  "Access-Control-Allow-Headers", "Content-Type, Accept"); 
+
             List<Group> toReturn = new List<Group>();
 
             SqlConnection connection = new SqlConnection(cString);
