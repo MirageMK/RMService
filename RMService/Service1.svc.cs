@@ -17,12 +17,16 @@ namespace RMService
     {
         string cString = ConfigurationManager.AppSettings["SQLSERVER_CONNECTION_STRING"];
 
+        private void fixCORS()
+        {
+            WebOperationContext.Current.OutgoingResponse.Headers.Add("Access-Control-Allow-Origin", "*");
+            WebOperationContext.Current.OutgoingResponse.Headers.Add("Access-Control-Allow-Methods", "POST");
+            WebOperationContext.Current.OutgoingResponse.Headers.Add("Access-Control-Allow-Headers", "Content-Type, Accept");
+        }
+
         public List<Group> getAllGroups()
         {
-            WebOperationContext.Current.OutgoingResponse.Headers.Add(
-  "Access-Control-Allow-Origin", "*"); WebOperationContext.Current.OutgoingResponse.Headers.Add(
-  "Access-Control-Allow-Methods", "POST"); WebOperationContext.Current.OutgoingResponse.Headers.Add(
-  "Access-Control-Allow-Headers", "Content-Type, Accept"); 
+            fixCORS();
 
             List<Group> toReturn = new List<Group>();
 
@@ -67,10 +71,7 @@ namespace RMService
 
         public Hashtable getAllSettings()
         {
-            WebOperationContext.Current.OutgoingResponse.Headers.Add(
-  "Access-Control-Allow-Origin", "*"); WebOperationContext.Current.OutgoingResponse.Headers.Add(
-  "Access-Control-Allow-Methods", "POST"); WebOperationContext.Current.OutgoingResponse.Headers.Add(
-  "Access-Control-Allow-Headers", "Content-Type, Accept"); 
+            fixCORS();
 
             Hashtable toReturn = new Hashtable();
 
@@ -106,6 +107,8 @@ namespace RMService
 
         public List<Item> getAllItems(string time)
         {
+            fixCORS();
+
             List<Item> toReturn = new List<Item>();
 
             SqlConnection connection = new SqlConnection(cString);
@@ -150,6 +153,8 @@ namespace RMService
 
         public List<Item> getAllItemsByGroup(string group)
         {
+            fixCORS();
+
             List<Item> toReturn = new List<Item>();
 
             SqlConnection connection = new SqlConnection(cString);
@@ -195,6 +200,8 @@ namespace RMService
 
         public String insertItem(Item item)
         {
+            fixCORS();
+
             String result;
 
             SqlConnection connection = new SqlConnection(cString);
@@ -235,7 +242,7 @@ namespace RMService
             return result;
         }
 
-        public Group getGroup(String gKey)
+        private Group getGroup(String gKey)
         {
             Group g = new Group();
 
@@ -275,6 +282,8 @@ namespace RMService
 
         public String setLogo(String logo)
         {
+            fixCORS();
+
             String result;
 
             SqlConnection connection = new SqlConnection(cString);
