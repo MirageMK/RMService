@@ -62,6 +62,11 @@ namespace RMService
 
         public Hashtable getAllSettings()
         {
+            WebOperationContext.Current.OutgoingResponse.Headers.Add(
+  "Access-Control-Allow-Origin", "*"); WebOperationContext.Current.OutgoingResponse.Headers.Add(
+  "Access-Control-Allow-Methods", "POST"); WebOperationContext.Current.OutgoingResponse.Headers.Add(
+  "Access-Control-Allow-Headers", "Content-Type, Accept"); 
+
             Hashtable toReturn = new Hashtable();
 
             SqlConnection connection = new SqlConnection(cString);
