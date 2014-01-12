@@ -242,6 +242,49 @@ namespace RMService
             return result;
         }
 
+        public String updateItem(Item item)
+        {
+            fixCORS();
+
+            String result;
+
+            SqlConnection connection = new SqlConnection(cString);
+            string sqlString = "UPDATE mItem" +
+                                "SET group = @group, " +
+                                "title = @title, " +
+                                "price = @price, " +
+                                "description = @description, " +
+                                "content = @content, " +
+                                "backgroundImage = @backgroundImage"+
+                                "WHERE id = @id";
+                                
+            SqlCommand cmd = new SqlCommand(sqlString, connection);
+
+            cmd.Parameters.AddWithValue("group", item.group.key);
+            cmd.Parameters.AddWithValue("title", item.title);
+            cmd.Parameters.AddWithValue("price", item.subtitle);
+            cmd.Parameters.AddWithValue("description", item.description);
+            cmd.Parameters.AddWithValue("content", item.content);
+            cmd.Parameters.AddWithValue("backgroundImage", item.backgroundImage);
+            cmd.Parameters.AddWithValue("id", item.ID);
+
+            try
+            {
+                connection.Open();
+                result = cmd.ExecuteNonQuery().ToString();
+            }
+            catch (Exception e)
+            {
+                return e.ToString();
+            }
+            finally
+            {
+                connection.Close();
+            }
+
+            return result;
+        }
+
         private Group getGroup(String gKey)
         {
             Group g = new Group();
@@ -295,6 +338,72 @@ namespace RMService
             SqlCommand cmd = new SqlCommand(sqlString, connection);
 
             cmd.Parameters.AddWithValue("logo", logo);
+
+            try
+            {
+                connection.Open();
+                result = cmd.ExecuteNonQuery().ToString();
+            }
+            catch (Exception e)
+            {
+                return e.ToString();
+            }
+            finally
+            {
+                connection.Close();
+            }
+
+            return result;
+        }
+
+        public String setPassword(String password)
+        {
+            fixCORS();
+
+            String result;
+
+            SqlConnection connection = new SqlConnection(cString);
+
+            string sqlString = "UPDATE mGeneral " +
+                                "SET value = @password " +
+                                "WHERE [key] = 'password'";
+
+            SqlCommand cmd = new SqlCommand(sqlString, connection);
+
+            cmd.Parameters.AddWithValue("password", password);
+
+            try
+            {
+                connection.Open();
+                result = cmd.ExecuteNonQuery().ToString();
+            }
+            catch (Exception e)
+            {
+                return e.ToString();
+            }
+            finally
+            {
+                connection.Close();
+            }
+
+            return result;
+        }
+
+        public String setName(String name)
+        {
+            fixCORS();
+
+            String result;
+
+            SqlConnection connection = new SqlConnection(cString);
+
+            string sqlString = "UPDATE mGeneral " +
+                                "SET value = @name " +
+                                "WHERE [key] = 'name'";
+
+            SqlCommand cmd = new SqlCommand(sqlString, connection);
+
+            cmd.Parameters.AddWithValue("name", name);
 
             try
             {

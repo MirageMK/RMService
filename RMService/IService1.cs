@@ -52,7 +52,28 @@ namespace RMService
         [WebInvoke(Method = "POST", RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedResponse,
+            UriTemplate = "updateItem")]
+        String updateItem(Item item);
+
+        [OperationContract]
+        [WebInvoke(Method = "POST", RequestFormat = WebMessageFormat.Json,
+            ResponseFormat = WebMessageFormat.Json,
+            BodyStyle = WebMessageBodyStyle.WrappedResponse,
             UriTemplate = "setLogo")]
         String setLogo(String logo);
+
+        [OperationContract]
+        [WebInvoke(Method = "POST", RequestFormat = WebMessageFormat.Json,
+            ResponseFormat = WebMessageFormat.Json,
+            BodyStyle = WebMessageBodyStyle.WrappedResponse,
+            UriTemplate = "setPassword")]
+        String setPassword(String password);
+
+        [OperationContract]
+        [WebInvoke(Method = "POST", RequestFormat = WebMessageFormat.Json,
+            ResponseFormat = WebMessageFormat.Json,
+            BodyStyle = WebMessageBodyStyle.WrappedResponse,
+            UriTemplate = "setName")]
+        String setName(String name);
     }
 }
