@@ -75,5 +75,19 @@ namespace RMService
             BodyStyle = WebMessageBodyStyle.WrappedResponse,
             UriTemplate = "setName")]
         String setName(String name);
+
+        [OperationContract]
+        [WebInvoke(Method = "POST", RequestFormat = WebMessageFormat.Json,
+            ResponseFormat = WebMessageFormat.Json,
+            BodyStyle = WebMessageBodyStyle.WrappedResponse,
+            UriTemplate = "setNotificationChannel")]
+        String setNotificationChannel(String notificationChannel);
+
+        [OperationContract]
+        [WebInvoke(Method = "GET",
+            ResponseFormat = WebMessageFormat.Json,
+            BodyStyle = WebMessageBodyStyle.Wrapped,
+            UriTemplate = "sendPushNotification")]
+        String sendPushNotification();
     }
 }

@@ -3,11 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
 using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Text;
+using System.Web;
 
 namespace RMService
 {
@@ -16,6 +20,8 @@ namespace RMService
     public class Service1 : IService1
     {
         string cString = ConfigurationManager.AppSettings["SQLSERVER_CONNECTION_STRING"];
+        string secret = "BkMKIxc9wMWZl6nZCLbs+VRousiwHt+w";
+        string sid = "ms-app://s-1-15-2-2945773104-2861258875-584576698-1826756059-3853356979-917734085-2567172873";
 
         private void fixCORS()
         {
@@ -255,9 +261,9 @@ namespace RMService
                                 "price = @price, " +
                                 "description = @description, " +
                                 "content = @content, " +
-                                "backgroundImage = @backgroundImage"+
+                                "backgroundImage = @backgroundImage" +
                                 "WHERE id = @id";
-                                
+
             SqlCommand cmd = new SqlCommand(sqlString, connection);
 
             cmd.Parameters.AddWithValue("group", item.group.key);
@@ -421,5 +427,161 @@ namespace RMService
 
             return result;
         }
+
+        public String setNotificationChannel(String notificationChannel)
+        {
+            fixCORS();
+
+            String result;
+
+            SqlConnection connection = new SqlConnection(cString);
+
+            string sqlString = "UPDATE mGeneral " +
+                                "SET value = @notificationChannel " +
+                                "WHERE [key] = 'notificationChannel'";
+
+            SqlCommand cmd = new SqlCommand(sqlString, connection);
+
+            cmd.Parameters.AddWithValue("notificationChannel", notificationChannel);
+
+            try
+            {
+                connection.Open();
+                result = cmd.ExecuteNonQuery().ToString();
+            }
+            catch (Exception e)
+            {
+                return e.ToString();
+            }
+            finally
+            {
+                connection.Close();
+            }
+
+            return result;
+        }
+
+        public String sendPushNotification()
+        {
+            fixCORS();
+
+            String uri = null;
+
+            SqlConnection connection = new SqlConnection(cString);
+            string sqlString = "SELECT * FROM mGeneral WHERE [key]='notificationChannel'";
+            SqlCommand cmd = new SqlCommand(sqlString, connection);
+
+            try
+            {
+                connection.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    uri = reader[2].ToString();
+                }
+                reader.Close();
+            }
+            catch (Exception e)
+            {
+                uri = null;
+            }
+            finally
+            {
+                connection.Close();
+            }
+
+            if (uri != null)
+            {
+                string xml = "<toast><visual><binding template='ToastText01'><text id='1'>bodyText</text></binding></visual></toast>";
+                return PostToWns(secret, sid, uri, xml, "wns/toast", "text/xml");
+            }
+            return "1";
+        }
+
+        #region OAuthToken
+        // Post to WNS
+        public string PostToWns(string secret, string sid, string uri, string xml, string notificationType, string contentType)
+        {
+            try
+            {
+                // You should cache this access token.
+                var accessToken = GetAccessToken(secret, sid);
+
+                byte[] contentInBytes = Encoding.UTF8.GetBytes(xml);
+
+                HttpWebRequest request = HttpWebRequest.Create(uri) as HttpWebRequest;
+                request.Method = "POST";
+                request.Headers.Add("X-WNS-Type", notificationType);
+                request.ContentType = contentType;
+                request.Headers.Add("Authorization", String.Format("Bearer {0}", accessToken.AccessToken));
+
+                using (Stream requestStream = request.GetRequestStream())
+                    requestStream.Write(contentInBytes, 0, contentInBytes.Length);
+
+                using (HttpWebResponse webResponse = (HttpWebResponse)request.GetResponse())
+                    return webResponse.StatusCode.ToString();
+            }
+            catch (WebException webException)
+            {
+                string exceptionDetails = webException.Response.Headers["WWW-Authenticate"];
+                if (exceptionDetails.Contains("Token expired"))
+                {
+                    GetAccessToken(secret, sid);
+
+                    // We suggest that you implement a maximum retry policy.
+                    return PostToWns(uri, xml, secret, sid, notificationType, contentType);
+                }
+                else
+                {
+                    // Log the response
+                    return "EXCEPTION: " + webException.Message;
+                }
+            }
+            catch (Exception ex)
+            {
+                return "EXCEPTION: " + ex.Message;
+            }
+        }
+
+        // Authorization
+        [DataContract]
+        public class OAuthToken
+        {
+            [DataMember(Name = "access_token")]
+            public string AccessToken { get; set; }
+            [DataMember(Name = "token_type")]
+            public string TokenType { get; set; }
+        }
+
+        private OAuthToken GetOAuthTokenFromJson(string jsonString)
+        {
+            using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+            {
+                var ser = new DataContractJsonSerializer(typeof(OAuthToken));
+                var oAuthToken = (OAuthToken)ser.ReadObject(ms);
+                return oAuthToken;
+            }
+        }
+
+        protected OAuthToken GetAccessToken(string secret, string sid)
+        {
+            var urlEncodedSecret = HttpUtility.UrlEncode(secret);
+            var urlEncodedSid = HttpUtility.UrlEncode(sid);
+
+            var body = String.Format("grant_type=client_credentials&client_id={0}&client_secret={1}&scope=notify.windows.com",
+                                     urlEncodedSid,
+                                     urlEncodedSecret);
+
+            string response;
+            using (var client = new WebClient())
+            {
+                client.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
+                response = client.UploadString("https://login.live.com/accesstoken.srf", body);
+            }
+            return GetOAuthTokenFromJson(response);
+        }
+
+        #endregion
     }
 }
