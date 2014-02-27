@@ -87,7 +87,7 @@ namespace RMService
         [WebInvoke(Method = "GET",
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.Wrapped,
-            UriTemplate = "sendPushNotification")]
-        String sendPushNotification();
+            UriTemplate = "sendPushNotification?source={source}&type={type}&text={text}")]
+        String sendPushNotification(string source, string type, string text);
     }
 }

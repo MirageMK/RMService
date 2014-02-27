@@ -461,7 +461,7 @@ namespace RMService
             return result;
         }
 
-        public String sendPushNotification()
+        public String sendPushNotification(String source, String type, String text)
         {
             fixCORS();
 
@@ -493,10 +493,47 @@ namespace RMService
 
             if (uri != null)
             {
-                string xml = "<toast><visual><binding template='ToastText01'><text id='1'>bodyText</text></binding></visual></toast>";
+                string xml = createToastXML(source, type, text);
                 return PostToWns(secret, sid, uri, xml, "wns/toast", "text/xml");
             }
             return "1";
+        }
+
+        private String createToastXML(string source, string type, string text)
+        {
+            String image1 = "image1";
+            switch (source)
+            {
+                case "1": image1 = "http://i.imgur.com/RqBi0Uf.png"; break; //Android
+                case "2": image1 = "http://i.imgur.com/0BbAs6A.png"; break; //iOS
+                case "3": image1 = "http://i.imgur.com/pW2eNMY.png"; break; //Windows 8
+                case "4": image1 = "http://i.imgur.com/tZf4OUO.png"; break; //Windows Phone
+                default: image1 = "image1"; break;
+            }
+
+            String headlineText = "";
+            String bodyText = "";
+            switch (type)
+            {
+                case "1": headlineText = "Order";
+                    bodyText = "Client wants to order " + text + " item(s).";
+                    break;
+                case "2": headlineText = "Pay";
+                    bodyText = "Client wants to pay. Total: $" + text + ".";
+                    break;
+                default: headlineText = "";
+                    bodyText = "";
+                    break;
+            }
+            return "<toast>" +
+                        "<visual>" +
+                            "<binding template='ToastImageAndText02'>" +
+                                "<image id='1' src='" + image1 + "' alt='image1'/>" +
+                                "<text id='1'>" + headlineText + "</text>" +
+                                "<text id='2'>" + bodyText + "</text>" +
+                            "</binding>" +
+                        "</visual>" +
+                    "</toast>";
         }
 
         #region OAuthToken
