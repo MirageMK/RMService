@@ -19,7 +19,7 @@ namespace RMService
     // NOTE: In order to launch WCF Test Client for testing this service, please select Service1.svc or Service1.svc.cs at the Solution Explorer and start debugging.
     public class Service1 : IService1
     {
-        string cString = ConfigurationManager.AppSettings["SQLSERVER_CONNECTION_STRING"];
+        string cString = "Data Source=(LocalDB)\\v11.0;AttachDbFilename=\"|DataDirectory|\\Database\\RestaurantMenuDB.mdf\";Integrated Security=True;Connect Timeout=30";
         string secret = "BkMKIxc9wMWZl6nZCLbs+VRousiwHt+w";
         string sid = "ms-app://s-1-15-2-2945773104-2861258875-584576698-1826756059-3853356979-917734085-2567172873";
 
@@ -211,6 +211,18 @@ namespace RMService
             String result;
 
             SqlConnection connection = new SqlConnection(cString);
+
+            string sqlStringBeforeInsertItem = "DECLARE @count int " +
+                                                "SET @count = (SELECT COUNT(*) FROM mItem " +
+                                                "WHERE [group] = @group)" +
+
+                                                "SELECT @count, title, id FROM mItem " +
+                                                "WHERE [group] = @group";
+
+            SqlCommand cmdBeforeInsertItem = new SqlCommand(sqlStringBeforeInsertItem, connection);
+
+            cmdBeforeInsertItem.Parameters.AddWithValue("group", item.group.key);
+
             string sqlString = "DECLARE @max int " +
                                 "SET @max = (SELECT max(id) FROM mItem) " +
 
@@ -234,7 +246,37 @@ namespace RMService
             try
             {
                 connection.Open();
-                result = cmd.ExecuteNonQuery().ToString();
+
+                SqlDataReader reader = cmdBeforeInsertItem.ExecuteReader();
+
+                bool firstItem = false;
+                int idToUpdate = 0;
+
+                while (reader.Read())
+                {
+                    if (Int32.Parse(reader[0].ToString()) == 1 &&
+                        reader[1].ToString() == "")
+                    {
+                        firstItem = true;
+                        idToUpdate = Int32.Parse(reader[2].ToString());
+                    }
+                }
+
+                reader.Close();
+
+                if (!firstItem)
+                    result = cmd.ExecuteNonQuery().ToString();
+                else
+                    result = updateItem(new Item
+                    {
+                        ID = idToUpdate,
+                        backgroundImage = item.backgroundImage,
+                        content = item.content,
+                        description = item.description,
+                        group = item.group,
+                        subtitle = item.subtitle,
+                        title = item.title
+                    });
             }
             catch (Exception e)
             {
@@ -255,13 +297,13 @@ namespace RMService
             String result;
 
             SqlConnection connection = new SqlConnection(cString);
-            string sqlString = "UPDATE mItem" +
-                                "SET group = @group, " +
+            string sqlString = "UPDATE mItem " +
+                                "SET [group] = @group, " +
                                 "title = @title, " +
                                 "price = @price, " +
                                 "description = @description, " +
                                 "content = @content, " +
-                                "backgroundImage = @backgroundImage" +
+                                "backgroundImage = @backgroundImage " +
                                 "WHERE id = @id";
 
             SqlCommand cmd = new SqlCommand(sqlString, connection);
@@ -277,6 +319,229 @@ namespace RMService
             try
             {
                 connection.Open();
+                result = cmd.ExecuteNonQuery().ToString();
+            }
+            catch (Exception e)
+            {
+                return e.ToString();
+            }
+            finally
+            {
+                connection.Close();
+            }
+
+            return result;
+        }
+
+        public String deleteItem(string itemId)
+        {
+            fixCORS();
+
+            String result;
+
+            SqlConnection connection = new SqlConnection(cString);
+
+            string sqlStringAfterDeleteItem = "DECLARE @groupKey varchar(10) " +
+                                                "DECLARE @count int " +
+
+                                                "SET @groupKey = (SELECT TOP 1 [group] FROM mItem " +
+                                                "WHERE id = @id) " +
+
+                                                "SET @count = (SELECT COUNT(*) FROM mItem " +
+                                                "WHERE [group] = @groupKey) " +
+
+                                                "SELECT @count, @groupKey";
+
+            SqlCommand cmdAfterDeleteItem = new SqlCommand(sqlStringAfterDeleteItem, connection);
+
+            cmdAfterDeleteItem.Parameters.AddWithValue("id", itemId);
+
+            string sqlString = "DELETE FROM mItem " +
+                                "WHERE id = @id";
+
+            SqlCommand cmd = new SqlCommand(sqlString, connection);
+
+            cmd.Parameters.AddWithValue("id", itemId);
+
+            try
+            {
+                connection.Open();
+
+                SqlDataReader reader = cmdAfterDeleteItem.ExecuteReader();
+                bool isLast = false;
+                string group = "";
+                while (reader.Read())
+                {
+                    if (Int32.Parse(reader[0].ToString()) == 1)
+                    {
+                        isLast = true;
+                        group = reader[1].ToString();
+                    }
+                }
+
+                reader.Close();
+
+                if (isLast)
+                    result = updateItem(new Item
+                    {
+                        backgroundImage = "",
+                        content = "",
+                        description = "",
+                        group = new Group
+                        {
+                            key = group
+                        },
+                        subtitle = "",
+                        title = "",
+                        ID = Int32.Parse(itemId)
+                    });
+                else
+                    result = cmd.ExecuteNonQuery().ToString();
+            }
+            catch (Exception e)
+            {
+                return e.ToString();
+            }
+            finally
+            {
+                connection.Close();
+            }
+
+            return result;
+        }
+
+        public String insertGroup(Group group)
+        {
+            fixCORS();
+
+            String result;
+
+            SqlConnection connection = new SqlConnection(cString);
+            string sqlString = "DECLARE @max int " +
+                                "SET @max = (SELECT max(id) FROM mGroup) " +
+
+                                "INSERT INTO mGroup " +
+                                "VALUES (@max+1, " +
+                                "'group' + CONVERT(varchar(10), @max+2), " +
+                                "@title, " +
+                                "@subtitle, " +
+                                "@backgroundImage, " +
+                                "@description)";
+            SqlCommand cmd = new SqlCommand(sqlString, connection);
+
+            cmd.Parameters.AddWithValue("title", group.title);
+            cmd.Parameters.AddWithValue("subtitle", group.subtitle);
+            cmd.Parameters.AddWithValue("backgroundImage", group.backgroundImage);
+            cmd.Parameters.AddWithValue("description", group.description);
+
+            string sqlStringForInsertItem = "DECLARE @max int " +
+                                "SET @max = (SELECT max(id) FROM mGroup) " +
+
+                                "SELECT [key] FROM mGroup WHERE id = @max";
+            SqlCommand cmdForInsertItem = new SqlCommand(sqlStringForInsertItem, connection);
+            try
+            {
+                connection.Open();
+                result = cmd.ExecuteNonQuery().ToString();
+
+                SqlDataReader reader = cmdForInsertItem.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    insertItem(new Item
+                    {
+                        backgroundImage = "",
+                        content = "",
+                        description = "",
+                        group = new Group
+                        {
+                            key = reader[0].ToString()
+                        },
+                        subtitle = "",
+                        title = ""
+                    });
+                }
+                reader.Close();
+            }
+            catch (Exception e)
+            {
+                return e.ToString();
+            }
+            finally
+            {
+                connection.Close();
+            }
+
+            return result;
+        }
+
+        public String updateGroup(Group group)
+        {
+            fixCORS();
+
+            String result;
+
+            SqlConnection connection = new SqlConnection(cString);
+            string sqlString = "UPDATE mGroup " +
+                                "SET title = @title, " +
+                                "subtitle = @subtitle, " +
+                                "backgroundImage = @backgroundImage, " +
+                                "description = @description " +
+                                "WHERE id = @id";
+
+            SqlCommand cmd = new SqlCommand(sqlString, connection);
+
+            cmd.Parameters.AddWithValue("title", group.title);
+            cmd.Parameters.AddWithValue("price", group.subtitle);
+            cmd.Parameters.AddWithValue("backgroundImage", group.backgroundImage);
+            cmd.Parameters.AddWithValue("description", group.description);
+
+            try
+            {
+                connection.Open();
+                result = cmd.ExecuteNonQuery().ToString();
+            }
+            catch (Exception e)
+            {
+                return e.ToString();
+            }
+            finally
+            {
+                connection.Close();
+            }
+
+            return result;
+        }
+
+        public String deleteGroup(string groupId)
+        {
+            fixCORS();
+
+            String result;
+
+            SqlConnection connection = new SqlConnection(cString);
+
+            string sqlStringDeleteItems = "DECLARE @group varchar(10) " +
+                                        "SET @group = (SELECT [key] FROM mGroup WHERE id = @id) " +
+
+                                        "DELETE FROM mItem " +
+                                        "WHERE [group] = @group";
+
+
+            SqlCommand cmdDeleteItems = new SqlCommand(sqlStringDeleteItems, connection);
+            cmdDeleteItems.Parameters.AddWithValue("id", groupId);
+
+            string sqlString = "DELETE FROM mGroup " +
+                                "WHERE id = @id";
+
+            SqlCommand cmd = new SqlCommand(sqlString, connection);
+
+            cmd.Parameters.AddWithValue("id", groupId);
+
+            try
+            {
+                connection.Open();
+                cmdDeleteItems.ExecuteNonQuery().ToString();
                 result = cmd.ExecuteNonQuery().ToString();
             }
             catch (Exception e)
