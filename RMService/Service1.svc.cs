@@ -19,7 +19,7 @@ namespace RMService
     // NOTE: In order to launch WCF Test Client for testing this service, please select Service1.svc or Service1.svc.cs at the Solution Explorer and start debugging.
     public class Service1 : IService1
     {
-        string cString = "Data Source=(LocalDB)\\v11.0;AttachDbFilename=\"|DataDirectory|\\Database\\RestaurantMenuDB.mdf\";Integrated Security=True;Connect Timeout=30";
+        string cString = ConfigurationManager.AppSettings["SQLSERVER_CONNECTION_STRING"];
         string secret = "BkMKIxc9wMWZl6nZCLbs+VRousiwHt+w";
         string sid = "ms-app://s-1-15-2-2945773104-2861258875-584576698-1826756059-3853356979-917734085-2567172873";
 
